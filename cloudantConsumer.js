@@ -2,6 +2,8 @@
 const { Kafka } = require("kafkajs")
 const topic = 'es-topic'
 const creds = require ("./creds.json")
+
+//create kafka object with access credentials
 const kafka = new Kafka({
 	clientId: 'my-app',
 	brokers: [creds.eventstreams_credentials.value["kafka_brokers_sasl.0"],
@@ -22,6 +24,19 @@ const kafka = new Kafka({
 	},
 })
 
+//create cloudant object with access credentials
+const { CloudantV1 } = require('@ibm-cloud/cloudant')
+
+const { IamAuthenticator } = require('ibm-cloud-sdk-core');
+const authenticator = new IamAuthenticator({
+    apikey: creds.cloudant_credentials.value.apikey
+});
+const cloudant = new CloudantV1({
+    authenticator: authenticator
+});
+cloudant.setServiceUrl(creds.cloudant_credentials.value.url);
+
+
 const consumer = kafka.consumer({ groupId: 'cloudant' })
 
 const run = async () => {
@@ -38,15 +53,19 @@ const run = async () => {
 		  //console.log(retval)
 		  retval = JSON.parse(retval)
 		  //console.log(retval)
+ 
 		  return retval
 
 	  })
-	  console.log(batch.rawMessages)
+	  const bulkDocs = {  docs: batch.rawMessages }
+		  
+	  const response = await cloudant.postBulkDocs({
+		db: 'trucktracker',
+		bulkDocs: bulkDocs
+	  })
+	  console.log("response is ", response)
+	  console.log("number of docs uploaded: ", batch.rawMessages.length)
     },
-//     eachMessage: async ({ topic, partition, message }) => {
-//       const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
-//       console.log(`- ${prefix} ${message.key}#${message.value}`)
-//     },
    })
 }
 
