@@ -1,8 +1,20 @@
 // import the `Kafka` instance from the kafkajs library
 const { Kafka } = require("kafkajs")
 const topic = 'es-topic'
-const data = require("./boulderToNYC.json")
 const creds = require("./creds.json")
+const path = require("path")
+
+if (process.argv.length !== 4) {
+	console.error("Usage: node producer.js <datafile> <truckid>")
+	process.exit(1)
+}
+const routeData = process.argv[2]
+const truckId = process.argv[3]
+
+console.log(path.join(__dirname,routeData))
+
+const data = require(path.join(__dirname, routeData))
+
 
 // initialize a new kafka client and initialize a producer from it
 const kafka = new Kafka({
@@ -47,7 +59,7 @@ const produce = async () => {
 			obj.lon = obj._lon
 			delete obj._lat
 			delete obj._lon 
-			obj.truckId = "truck001"
+			obj.truckId = truckId
 			obj.date = new Date().toISOString()
 
 			// send a message to the configured topic with
