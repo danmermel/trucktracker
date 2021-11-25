@@ -2,6 +2,16 @@
 const { Kafka } = require("kafkajs")
 const topic = 'es-topic'
 const creds = require ("./creds.json")
+const redis = require("redis")
+
+//create Redis things
+
+const ca = Buffer.from(creds.redis_credentials.value["connection.cli.certificate.certificate_base64"], 'base64').toString('utf-8')
+//console.log(ca)
+const tls = { ca };
+const url = creds.redis_credentials.value["connection.rediss.composed.0"]
+//console.log(url)
+const redisClient = redis.createClient(url, { tls: { ca: ca } })
 
 //create kafka object with access credentials
 const kafka = new Kafka({
@@ -28,6 +38,11 @@ const consumer = kafka.consumer({ groupId: 'redis' })
 
 const run = async () => {
   await consumer.connect()
+  console.log("connected to kafka")
+  //await redisClient.connect();
+  //console.log("connected to Redis")
+
+
   await consumer.subscribe({ topic
 							//, fromBeginning: true
 						 })
@@ -53,6 +68,10 @@ const run = async () => {
 		redisObj[message.truckId] = message
 	  }
 	  console.log(redisObj)
+	  for (var truckId in redisObj) {
+		  await redisClient.set(truckId, JSON.stringify(redisObj[truckId]))
+		  console.log("written to Redis: ", truckId)
+	  }
     },
    })
 }
