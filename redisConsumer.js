@@ -69,7 +69,7 @@ const run = async () => {
 	  }
 	  console.log(redisObj)
 	  for (var truckId in redisObj) {
-		  await redisClient.set(truckId, JSON.stringify(redisObj[truckId]))
+		  await redisClient.hset("trucks", truckId, JSON.stringify(redisObj[truckId]))
 		  console.log("written to Redis: ", truckId)
 	  }
     },
