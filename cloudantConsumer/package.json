@@ -1,0 +1,17 @@
+{
+  "name": "cloudantConsumer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cloudantConsumer.js",
+  "scripts": {
+    "start": "node cloudantConsumer.js",
+    "standard": "standard --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ibm-cloud/cloudant": "^0.0.21",
+    "ibm-cloud-sdk-core": "^2.17.0",
+    "kafkajs": "^1.15.0"
+  }
+}
