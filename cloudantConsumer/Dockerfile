@@ -15,5 +15,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-#now start producing some data
+#now start consuming some data
 ENTRYPOINT ["npm", "run", "start"]
