@@ -2,10 +2,10 @@
 #this script has to run after all other terraform actions have happened. 
 #So the TF command to run it has to depend_on all the other actions
 
-# #first copy the terraform output to a creds file
-# cd terraform
-# terraform output -json > ../creds.json
-# cd ..
+#first copy the terraform output to a creds file
+cd terraform
+terraform output -json > ../creds.json
+cd ..
 
 #copy creds to all the folders
 cp creds.json cloudantConsumer/ 
@@ -13,7 +13,10 @@ cp creds.json redisConsumer/
 cp creds.json producer/ 
 cp creds.json web/
 
-# #let docker access your ibm container registry
+#make sure your account is targeting a resource group
+ibmcloud target -g default 
+
+#let docker access your ibm container registry
 ibmcloud cr login
 
 #go into each folder, build the docker images and push to container registry
