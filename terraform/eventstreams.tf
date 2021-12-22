@@ -1,5 +1,5 @@
 resource "ibm_resource_group" "resource_group" {
-  name = "danielm1"
+  name = "rg001"
 }
 
 resource "ibm_resource_instance" "event_streams_instance" {

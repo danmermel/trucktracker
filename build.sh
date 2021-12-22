@@ -14,7 +14,7 @@ cp creds.json producer/
 cp creds.json web/
 
 #make sure your account is targeting a resource group
-ibmcloud target -g default 
+ibmcloud target -g rg001 
 
 #let docker access your ibm container registry
 ibmcloud cr login
