@@ -6,6 +6,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
     integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
     crossorigin="" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
 <style>
@@ -15,58 +18,112 @@
 </style>
 
 <body>
-  <v-app id="app">
-    <v-main>
-      <h2 class="mb-5" align="center">Truck Tracker</h2>
-      <div id="map"></div>
-    </v-main>
-
-  </v-app>
+  <div id="app">
+    <v-app>
+      <v-app-bar app dark>
+        <v-app-bar-nav-icon></v-app-bar-nav-icon>
+        <v-toolbar-title>IBM {{ name }} <span v-if="currentTruckId"> - </span> {{ currentTruckId }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+      </v-app-bar>
+      <v-main>
+        <v-row>
+          <v-col cols="2">
+            <v-list dense>
+              <v-list-item-group v-model="selectedTruck">
+                <v-list-item two-line v-for="truck,id in trucks" :key="id">
+                  <v-list-item-avatar>
+                    <v-icon>mdi-truck</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      {{ id }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle>{{ truck.lat }}, {{ truck.lon }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </v-col>
+          <v-col  cols="10">
+            <div id="map"></div>
+          </v-col>
+        </v-row>
+      </v-main>
+      <v-footer app>
+        <v-col class="text-center" cols="12">
+          Copyright {{ new Date().getFullYear() }} -
+          <a href="https://github.com/danmermel/trucktracker">
+            Get the code
+          </a>
+        </v-col>
+      </v-footer>
+    </v-app>
+  </div>
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    
   <script>
+    let markers = {}  //contains all your trucks keyed on truck id
+    const app = new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          name: 'Truck Tracker',
+          showDrawer: true,
+          trucks: {},
+          selectedTruck: ''
+        }
+      },
+      computed: {
+        currentTruckId: function () {
+          const keys = Object.keys(this.trucks)
+          const id = keys[this.selectedTruck]
+          if (id && markers[id]) {
+            markers[id].openPopup()
+          }
+          return id
+        }
+      },
+      methods: {
+        poll: async function() {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const data = await response.json()
+          this.trucks = data
+          //find out how many markers you have
+          for (truckid in data) {
+            if (markers[truckid]) {
+              // we know this guy, so move the marker
+              var newLatLng = new L.LatLng(data[truckid].lat, data[truckid].lon);
+              markers[truckid].setLatLng(newLatLng);
+            } else {
+              // new truck.. create a marker
+              markers[truckid] = L.marker([data[truckid].lat, data[truckid].lon]).addTo(mymap);
+              markers[truckid].bindPopup(truckid).openPopup()
+            }
+            app.trucks[truckid] = data[truckid]
+          }
+        }
+      }
+    })
+
     var mymap = L.map('map').setView([38.64101385010069, -99.5008968884035], 5);
-
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(mymap);
-
-
     const url = window.location.origin + "/data"
-    let markers = {}  //contains all your trucks keyed on truck id
 
-    const getMarker = async function () {
-      console.log("getting marker from ", url)
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data = await response.json();
-      console.log("data is ", data)
-      //find out how many markers you have
-      for (truckid in data) {
-        if (markers[truckid]) {
-          // we know this guy, so move the marker
-          var newLatLng = new L.LatLng(data[truckid].lat, data[truckid].lon);
-          markers[truckid].setLatLng(newLatLng);
-        } else {
-          // new truck.. create a marker
-          markers[truckid] = L.marker([data[truckid].lat, data[truckid].lon]).addTo(mymap);
-          markers[truckid].bindPopup(truckid).openPopup()
-
-        }
-      }
-    }
-
+    app.poll()
     setInterval(async () => {
-      getMarker()
+      app.poll()
     }, 5000)
-
   </script>
 </body>
-
 </html>
