@@ -29,7 +29,7 @@
         <v-row>
           <v-col cols="2">
             <v-list dense>
-              <v-list-item-group v-model="selectedTruck">
+              <v-list-item-group v-on:change="onChangeTruck" v-model="selectedTruck">
                 <v-list-item two-line v-for="truck,id in trucks" :key="id">
                   <v-list-item-avatar>
                     <v-icon>mdi-truck</v-icon>
@@ -43,6 +43,7 @@
                 </v-list-item>
               </v-list-item-group>
             </v-list>
+            <v-btn v-on:click="zoomOut">Zoom Out</v-btn>
           </v-col>
           <v-col  cols="10">
             <div id="map"></div>
@@ -75,7 +76,8 @@
           name: 'Truck Tracker',
           showDrawer: true,
           trucks: {},
-          selectedTruck: ''
+          selectedTruck: '',
+          currentTruckId: ''
         }
       },
       computed: {
@@ -84,11 +86,28 @@
           const id = keys[this.selectedTruck]
           if (id && markers[id]) {
             markers[id].openPopup()
+            mymap.setZoom(12)
+            mymap.panTo(markers[id].getLatLng());
+
           }
           return id
         }
       },
       methods: {
+        onChangeTruck: async function() {
+          const keys = Object.keys(this.trucks)
+          const id = keys[this.selectedTruck]
+          if (id && markers[id]) {
+            markers[id].openPopup()
+            mymap.setZoom(12)
+            mymap.panTo(markers[id].getLatLng());
+          }
+          this.currentTruckId = id
+        },
+        zoomOut: async function() {
+          mymap.setZoom(5)
+          mymap.panTo([38.64101385010069, -99.5008968884035])
+        },
         poll: async function() {
           const response = await fetch(url, {
             method: 'POST',
