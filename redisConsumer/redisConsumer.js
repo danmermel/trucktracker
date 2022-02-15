@@ -38,9 +38,9 @@ const kafka = new Kafka({
 			creds.eventstreams_credentials.value["kafka_brokers_sasl.2"],
 			creds.eventstreams_credentials.value["kafka_brokers_sasl.3"],
 			creds.eventstreams_credentials.value["kafka_brokers_sasl.4"],
-			creds.eventstreams_credentials.value["kafka_brokers_sasl.5"]
-		
+			creds.eventstreams_credentials.value["kafka_brokers_sasl.5"],
 	],
+	connectionTimeout: 30000,
 	// authenticationTimeout: 1000,
 	// reauthenticationThreshold: 10000,
 	ssl: true,
