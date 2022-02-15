@@ -53,21 +53,13 @@ ibmcloud ce project select -n trucktracker
 CONTKEY_PASS=`cat creds.json | jq '.containerKey.value' | sed 's/"//g'`
 ibmcloud ce registry create --name contkey --server uk.icr.io --password "${CONTKEY_PASS}"
 
-#create a CE job for producers and consumers
-ibmcloud ce job create --name cloudantconsumer --image uk.icr.io/trucktracker/cloudantconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey
-ibmcloud ce jobrun submit --job cloudantconsumer --name cloudantconsumer --met 43200
-
-ibmcloud ce job create --name redisconsumer --image uk.icr.io/trucktracker/redisconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey
-ibmcloud ce jobrun submit --job redisconsumer --name redisconsumer --met 43200
-
-#The above two could also be run as applications instead of jobs:
 #create a CE app for redisconsumer
-#ibmcloud ce application create --name redisconsumer --image uk.icr.io/trucktracker/redisconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey
+ibmcloud ce application create --name redisconsumer --image uk.icr.io/trucktracker/redisconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey --min 1
 
 #create a CE app for cloudantconsumer
-#ibmcloud ce application create --name cloudantconsumer --image uk.icr.io/trucktracker/cloudantconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey
+ibmcloud ce application create --name cloudantconsumer --image uk.icr.io/trucktracker/cloudantconsumer --cpu 0.125 --memory 0.25G --registry-secret contkey --min 1
 
-
+#create four "truck" data producers
 ibmcloud ce job create --name producer --image uk.icr.io/trucktracker/producer --cpu 0.125 --memory 0.25G --registry-secret contkey
 ibmcloud ce jobrun submit --job producer --name producer1 --argument LAToDallas.json --argument truck001 --met 43200
 ibmcloud ce jobrun submit --job producer --name producer2 --argument boulderToNYC.json --argument truck002 --met 43200
