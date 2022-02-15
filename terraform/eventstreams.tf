@@ -3,7 +3,7 @@ resource "ibm_resource_group" "resource_group" {
 }
 
 resource "ibm_resource_instance" "event_streams_instance" {
-  name              = "danielES"
+  name              = "trucktrackerES"
   service           = "messagehub"
   plan              = "standard" 
   location          = "eu-gb" # "us-east", "eu-gb", "eu-de", "jp-tok", "au-syd"

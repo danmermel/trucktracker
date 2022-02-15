@@ -15,5 +15,7 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+EXPOSE 8080
+
 #now start consuming some data
 ENTRYPOINT ["npm", "run", "start"]

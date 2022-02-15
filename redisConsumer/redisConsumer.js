@@ -3,6 +3,23 @@ const { Kafka } = require("kafkajs")
 const topic = 'es-topic'
 const creds = require ("./creds.json")
 const redis = require("redis")
+const express = require('express')
+
+const PORT = 8080 // the default for Code Engine
+const HOST = '0.0.0.0' // listen on all network interfaces
+
+//create the app
+const app = express()
+
+//the home route responds with an "alive" thing
+app.get('/', async (req, res) => {
+  res.send({ok:true})
+})
+
+// start the webserver
+app.listen(PORT, HOST)
+console.log(`Running on http://${HOST}:${PORT}`)
+
 
 //create Redis things
 
